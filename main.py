@@ -1,5 +1,4 @@
-import termios
-import tty
+import platform
 import requests as rq
 import threading
 import time
@@ -8,13 +7,17 @@ import urllib3
 import keyboard
 import os
 import sys
-import platform
 from colorsys import hsv_to_rgb
 from rgbxy import Converter
 from rgbxy import GamutC
 import light_specific_vars
 import light_utils
-
+if platform.system() == 'Linux':
+    import termios
+    import tty
+    clear_command = 'clear'
+elif platform.system() == 'Windows':
+    clear_command = 'cls'
 converter = Converter(GamutC)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # Disable warning about insecure connection
 header = light_specific_vars.header
@@ -61,27 +64,29 @@ def listen_for_break_key():
         break_from_function = True
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, orig_settings)
     else:
-        if keyboard.is_pressed('q'):
-            break_from_function = True
+        while True:        
+            if keyboard.is_pressed('q'):
+                break_from_function = True
+                break
     # "keyboard" library requires root access in Linux environment, so different method is used in the "if" block
     # source : https://copyprogramming.com/howto/python-detect-which-key-is-pressed-python-linux
 
 
 def change_power():
-    os.system('clear')
+    os.system(clear_command)
     light_utils.change_power()
-    os.system('clear')
+    os.system(clear_command)
 
 
 def set_brightness_level():
-    os.system('clear')
+    os.system(clear_command)
     brightness_level = int(input('Enter brightness level: '))
     if brightness_level > 100:
         brightness_level = 100
     elif brightness_level < 0:
         brightness_level = 0
     light_utils.change_brightness(brightness_level)
-    os.system('clear')
+    os.system(clear_command)
 
 
 def cycle_colors():
@@ -94,7 +99,7 @@ def cycle_colors():
 
 
 def cycle_colors_option():
-    os.system('clear')
+    os.system(clear_command)
     print('Cycling through colors...')
     print('Press q to quit to main menu!')
 
@@ -108,14 +113,14 @@ def cycle_colors_option():
     cycle_colors()
     global break_from_function
     break_from_function = False
-    os.system('clear')
+    os.system(clear_command)
 
 
 def invalid_option():
-    os.system('clear')
+    os.system(clear_command)
     print("Choose valid option!")
     time.sleep(1)
-    os.system('clear')
+    os.system(clear_command)
 
 
 def main():
@@ -142,3 +147,10 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    # print('Hello!')
+    # while True:
+    #     if keyboard.is_pressed('q'):
+    #         print('Q pressed!')
+    #         sys.exit()
+
